@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: planner
+  namespace: predictive-autoscaling
+  labels:
+    app: planner
+    component: autoscaling
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: planner-role
+  namespace: predictive-autoscaling
+  labels:
+    app: planner
+    component: autoscaling
+rules:
+  # Read and patch Deployments (for scaling)
+  - apiGroups: ["apps"]
+    resources: ["deployments", "deployments/scale"]
+    verbs: ["get", "list", "watch", "patch"]
+  # Read pods (for status reporting)
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: planner-rolebinding
+  namespace: predictive-autoscaling
+  labels:
+    app: planner
+    component: autoscaling
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: planner-role
+subjects:
+  - kind: ServiceAccount
+    name: planner
+    namespace: predictive-autoscaling

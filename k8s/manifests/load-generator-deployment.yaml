@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-generator
+  namespace: predictive-autoscaling
+  labels:
+    app: load-generator
+    component: synthetic-traffic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-generator
+  template:
+    metadata:
+      labels:
+        app: load-generator
+        component: synthetic-traffic
+    spec:
+      containers:
+        - name: load-generator
+          image: ghcr.io/visagedvachevsky/k8s-ml-predictive-autoscaling-demo:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AUTOSCALER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: demo-service-credentials
+                  key: api-token
+            - name: AUTOSCALER_API_KEY_HEADER
+              value: X-API-Key
+          args:
+            - python
+            - -m
+            - k8s_ml_predictive_autoscaling.load_generator
+            - --targets
+            - http://demo-service.predictive-autoscaling.svc.cluster.local:8000
+            - --interval
+            - "1.0"
+            - --minutes
+            - "240"
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

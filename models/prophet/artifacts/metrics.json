@@ -1,0 +1,14 @@
+{
+  "validation_metrics": {
+    "rmse": 0.7804381923340364,
+    "mae": 0.6257222796716366,
+    "mape": 195.41128500510118,
+    "samples": 1630
+  },
+  "hyperparameters": {
+    "seasonality_mode": "multiplicative",
+    "changepoint_prior_scale": 0.05,
+    "seasonality_prior_scale": 10.0
+  },
+  "target_column": "cpu_usage"
+}

@@ -1,0 +1,5 @@
+scenario,hpa_avg_replicas,ml_avg_replicas,hpa_replica_minutes,ml_replica_minutes,hpa_sla_violations,ml_sla_violations,hpa_sla_violation_rate,ml_sla_violation_rate,hpa_over_provisioning_pct,ml_over_provisioning_pct,hpa_under_provisioning_pct,ml_under_provisioning_pct,hpa_scaling_events,ml_scaling_events,hpa_avg_reaction_time,ml_avg_reaction_time,cost_savings_pct,total_steps
+stable_workload,2.0,2.0,3000.0,3000.0,0,0,0.0,0.0,48.85,48.85,0.0,0.0,0,0,0.0,0.0,0.0,300
+gradual_ramp,4.58,4.21,9165.0,8420.0,0,0,0.0,0.0,44.8,39.51,0.05,0.44,6,3,0.04,0.2,8.13,400
+spike_pattern,3.84,6.06,6715.0,10605.0,0,0,0.0,0.0,42.03,65.97,0.05,0.0,41,19,0.04,0.0,-57.93,350
+diurnal_cycle,5.71,6.47,16435.0,18640.0,0,0,0.0,0.0,52.4,60.16,0.06,0.02,21,12,0.02,0.01,-13.42,576

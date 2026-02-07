@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: planner
+  namespace: predictive-autoscaling
+  labels:
+    app: planner
+    component: autoscaling
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: planner
+  template:
+    metadata:
+      labels:
+        app: planner
+        component: autoscaling
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: planner
+      containers:
+        - name: planner
+          image: ghcr.io/visagedvachevsky/k8s-ml-planner:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PLANNER_ENVIRONMENT
+              value: prod
+            - name: PLANNER_LOG_LEVEL
+              value: INFO
+            - name: PLANNER_PREDICTOR_URL
+              value: http://predictor.predictive-autoscaling.svc.cluster.local:80
+            - name: PLANNER_PROMETHEUS_URL
+              value: http://prometheus.predictive-autoscaling.svc.cluster.local:9090
+            - name: PLANNER_TARGET_DEPLOYMENT
+              value: demo-service
+            - name: PLANNER_TARGET_NAMESPACE
+              value: predictive-autoscaling
+            - name: PLANNER_USE_K8S_CLIENT
+              value: "true"
+            - name: PLANNER_LOOP_INTERVAL_SECONDS
+              value: "60"
+            - name: PLANNER_BACKFILL_ON_STARTUP
+              value: "true"
+            - name: PLANNER_MIN_REPLICAS
+              value: "2"
+            - name: PLANNER_MAX_REPLICAS
+              value: "8"
+            - name: PLANNER_TARGET_UTILIZATION
+              value: "60"
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

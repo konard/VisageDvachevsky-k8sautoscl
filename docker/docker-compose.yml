@@ -1,0 +1,143 @@
+version: "3.9"
+
+services:
+  demo-service-a:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.demo-service
+    environment:
+      AUTOSCALER_SERVICE_NAME: demo-service-a
+      AUTOSCALER_API_TOKEN: ${AUTOSCALER_API_TOKEN:?AUTOSCALER_API_TOKEN is required}
+      AUTOSCALER_API_KEY_HEADER: ${AUTOSCALER_API_KEY_HEADER:-X-API-Key}
+    ports:
+      - "8001:8000"
+    networks:
+      - observability
+
+  demo-service-b:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.demo-service
+    environment:
+      AUTOSCALER_SERVICE_NAME: demo-service-b
+      AUTOSCALER_API_TOKEN: ${AUTOSCALER_API_TOKEN:?AUTOSCALER_API_TOKEN is required}
+      AUTOSCALER_API_KEY_HEADER: ${AUTOSCALER_API_KEY_HEADER:-X-API-Key}
+    ports:
+      - "8002:8000"
+    networks:
+      - observability
+
+  demo-service-c:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.demo-service
+    environment:
+      AUTOSCALER_SERVICE_NAME: demo-service-c
+      AUTOSCALER_API_TOKEN: ${AUTOSCALER_API_TOKEN:?AUTOSCALER_API_TOKEN is required}
+      AUTOSCALER_API_KEY_HEADER: ${AUTOSCALER_API_KEY_HEADER:-X-API-Key}
+    ports:
+      - "8003:8000"
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    command: ["--config.file=/etc/prometheus/prometheus.yml"]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - observability
+    depends_on:
+      - demo-service-a
+      - demo-service-b
+      - demo-service-c
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:?Set GF_SECURITY_ADMIN_PASSWORD}
+      GF_SECURITY_ADMIN_EMAIL: ${GF_SECURITY_ADMIN_EMAIL:-admin@example.com}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - observability
+    depends_on:
+      - prometheus
+
+  predictor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.predictor
+    environment:
+      PREDICTOR_ENVIRONMENT: local
+      PREDICTOR_LOG_LEVEL: INFO
+      PREDICTOR_ONNX_MODEL_PATH: /app/models/onnx/lstm_forecaster.onnx
+      PREDICTOR_SCALER_PATH: /app/data/processed/scaler.pkl
+      PREDICTOR_METADATA_PATH: /app/data/processed/metadata.json
+      PREDICTOR_SEQUENCE_LENGTH: "24"
+    ports:
+      - "8010:8000"
+    networks:
+      - observability
+    depends_on:
+      - prometheus
+
+  planner:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.planner
+    environment:
+      PLANNER_ENVIRONMENT: local
+      PLANNER_LOG_LEVEL: INFO
+      PLANNER_PREDICTOR_URL: http://predictor:8000
+      PLANNER_PROMETHEUS_URL: http://prometheus:9090
+      PLANNER_TARGET_DEPLOYMENT: demo-service
+      PLANNER_TARGET_NAMESPACE: default
+      PLANNER_USE_K8S_CLIENT: "false"
+      PLANNER_LOOP_INTERVAL_SECONDS: "60"
+      PLANNER_BACKFILL_ON_STARTUP: "true"
+    ports:
+      - "8020:8000"
+    networks:
+      - observability
+    depends_on:
+      - predictor
+      - prometheus
+
+  load-generator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.demo-service
+    environment:
+      AUTOSCALER_API_TOKEN: ${AUTOSCALER_API_TOKEN:?AUTOSCALER_API_TOKEN is required}
+      AUTOSCALER_API_KEY_HEADER: ${AUTOSCALER_API_KEY_HEADER:-X-API-Key}
+    command:
+      [
+        "python",
+        "-m",
+        "k8s_ml_predictive_autoscaling.load_generator",
+        "--targets",
+        "http://demo-service-a:8000",
+        "http://demo-service-b:8000",
+        "http://demo-service-c:8000",
+        "--interval",
+        "1.0",
+        "--minutes",
+        "10080",  # 7 days (48h minimum recommended, 7d for extra safety)
+      ]
+    restart: unless-stopped  # Auto-restart if crashes
+    depends_on:
+      - demo-service-a
+      - demo-service-b
+      - demo-service-c
+    networks:
+      - observability
+
+networks:
+  observability:
+    driver: bridge

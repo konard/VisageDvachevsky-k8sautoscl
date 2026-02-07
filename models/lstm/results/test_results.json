@@ -1,0 +1,19 @@
+{
+  "model_type": "lstm",
+  "model_config": {
+    "model_type": "lstm",
+    "input_size": 44,
+    "hidden_size": 64,
+    "num_layers": 2,
+    "dropout": 0.2,
+    "bidirectional": false
+  },
+  "test_metrics": {
+    "rmse": 0.33306872844696045,
+    "mae": 0.24968482553958893,
+    "mape": 92.64864349365234,
+    "r2": 0.8865152597427368,
+    "mse": 0.110934779047966
+  },
+  "test_samples": 1606
+}

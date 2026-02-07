@@ -1,0 +1,139 @@
+{
+  "lstm": {
+    "export": {
+      "model_type": "lstm",
+      "input_size": 44,
+      "hidden_size": 64,
+      "num_layers": 2,
+      "seq_length": 24,
+      "opset_version": 17,
+      "file_size_bytes": 268801,
+      "file_size_mb": 0.26
+    },
+    "validation": {
+      "max_abs_difference": 1.1920928955078125e-07,
+      "mean_abs_difference": 4.0158628422659604e-08,
+      "all_close_atol_1e5": true,
+      "n_samples_tested": 100
+    },
+    "benchmark": {
+      "batch_size": 1,
+      "n_iterations": 1000,
+      "pytorch_ms": {
+        "mean": 0.504,
+        "p50": 0.516,
+        "p95": 0.616,
+        "p99": 0.706
+      },
+      "onnx_runtime_ms": {
+        "mean": 0.132,
+        "p50": 0.127,
+        "p95": 0.161,
+        "p99": 0.218
+      },
+      "speedup": 3.82
+    },
+    "quantization": {
+      "original_size_mb": 0.26,
+      "quantized_size_mb": 0.08,
+      "compression_pct": 70.0
+    },
+    "quantized_benchmark": {
+      "batch_size": 1,
+      "n_iterations": 1000,
+      "pytorch_ms": {
+        "mean": 0.494,
+        "p50": 0.512,
+        "p95": 0.609,
+        "p99": 0.72
+      },
+      "onnx_runtime_ms": {
+        "mean": 0.126,
+        "p50": 0.119,
+        "p95": 0.164,
+        "p99": 0.205
+      },
+      "speedup": 3.92
+    }
+  },
+  "hybrid_residual_lstm": {
+    "export": {
+      "model_type": "lstm",
+      "input_size": 44,
+      "hidden_size": 64,
+      "num_layers": 2,
+      "seq_length": 24,
+      "opset_version": 17,
+      "file_size_bytes": 268801,
+      "file_size_mb": 0.26
+    },
+    "validation": {
+      "max_abs_difference": 1.564621925354004e-07,
+      "mean_abs_difference": 3.771856427192688e-08,
+      "all_close_atol_1e5": true,
+      "n_samples_tested": 100
+    },
+    "benchmark": {
+      "batch_size": 1,
+      "n_iterations": 1000,
+      "pytorch_ms": {
+        "mean": 0.502,
+        "p50": 0.522,
+        "p95": 0.621,
+        "p99": 0.708
+      },
+      "onnx_runtime_ms": {
+        "mean": 0.127,
+        "p50": 0.124,
+        "p95": 0.153,
+        "p99": 0.2
+      },
+      "speedup": 3.96
+    },
+    "quantization": {
+      "original_size_mb": 0.26,
+      "quantized_size_mb": 0.08,
+      "compression_pct": 70.0
+    }
+  },
+  "prophet": {
+    "params": {
+      "growth": "linear",
+      "changepoints": [
+        "2018-01-01 21:15:00",
+        "2018-01-02 17:35:00",
+        "2018-01-03 13:50:00",
+        "2018-01-04 10:05:00",
+        "2018-01-05 06:25:00",
+        "2018-01-06 02:40:00",
+        "2018-01-06 22:55:00",
+        "2018-01-07 19:15:00",
+        "2018-01-08 15:30:00",
+        "2018-01-09 11:45:00",
+        "2018-01-10 08:05:00",
+        "2018-01-11 04:20:00",
+        "2018-01-12 00:35:00",
+        "2018-01-12 20:50:00",
+        "2018-01-13 17:10:00",
+        "2018-01-14 13:25:00",
+        "2018-01-15 09:40:00",
+        "2018-01-16 06:00:00",
+        "2018-01-17 02:15:00",
+        "2018-01-17 22:30:00",
+        "2018-01-18 18:50:00",
+        "2018-01-19 15:05:00",
+        "2018-01-20 11:20:00",
+        "2018-01-21 07:40:00",
+        "2018-01-22 03:55:00"
+      ],
+      "n_changepoints": 25,
+      "seasonality_mode": "multiplicative",
+      "changepoint_prior_scale": 0.05,
+      "seasonality_prior_scale": 10.0,
+      "daily_seasonality": true,
+      "weekly_seasonality": true,
+      "yearly_seasonality": false
+    },
+    "note": "Serialized as pickle + JSON metadata"
+  }
+}

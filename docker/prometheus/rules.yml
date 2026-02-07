@@ -1,0 +1,75 @@
+groups:
+  - name: predictive_autoscaling
+    rules:
+      # Critical: Predictor service is down
+      - alert: PredictorDown
+        expr: up{job="predictor"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: predictor
+        annotations:
+          summary: "Predictor service is down"
+          description: "The ML predictor service has been unreachable for more than 1 minute. Planner will operate in fallback mode (hold current replicas)."
+
+      # Critical: Planner entered degraded mode (5+ consecutive failures)
+      - alert: PlannerDegraded
+        expr: planner_degraded == 1
+        for: 2m
+        labels:
+          severity: critical
+          component: planner
+        annotations:
+          summary: "Planner is in degraded mode"
+          description: "The planner has entered degraded mode after 5+ consecutive control loop failures. Scaling decisions are suspended."
+
+      # Warning: High prediction error rate
+      - alert: HighPredictionErrorRate
+        expr: >
+          sum(rate(predictor_predictions_total{status="error"}[5m]))
+          /
+          sum(rate(predictor_predictions_total[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          component: predictor
+        annotations:
+          summary: "High prediction error rate (> 5%)"
+          description: "More than 5% of prediction requests are failing. Current error rate: {{ $value | humanizePercentage }}."
+
+      # Warning: Planner control loop is slow
+      - alert: PlannerHighLoopLatency
+        expr: >
+          histogram_quantile(0.95,
+            sum(rate(planner_loop_duration_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+          component: planner
+        annotations:
+          summary: "Planner control loop p95 latency > 5s"
+          description: "The planner control loop p95 latency is {{ $value | humanizeDuration }}, exceeding the 5s threshold."
+
+      # Warning: Replicas at maximum capacity
+      - alert: ReplicasAtMax
+        expr: planner_current_replicas >= 8
+        for: 10m
+        labels:
+          severity: warning
+          component: planner
+        annotations:
+          summary: "Replicas at maximum capacity (8)"
+          description: "The target deployment has been running at maximum replicas (8) for over 10 minutes. Consider increasing max_replicas or investigating load."
+
+      # Warning: Multiple consecutive failures
+      - alert: ConsecutiveFailures
+        expr: planner_consecutive_failures > 3
+        for: 2m
+        labels:
+          severity: warning
+          component: planner
+        annotations:
+          summary: "Planner has {{ $value }} consecutive failures"
+          description: "The planner control loop has failed {{ $value }} times in a row. Degraded mode triggers at 5 failures."

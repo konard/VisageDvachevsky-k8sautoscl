@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_IN_PROJECT: "true"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Poetry
+        run: |
+          pip install --upgrade pip
+          pip install "poetry==1.8.3"
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-py3.11-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction --no-ansi --with dev
+          poetry show
+
+      - name: Check code formatting (black)
+        run: poetry run black --check --diff .
+
+      - name: Check import sorting (isort)
+        run: poetry run isort --check-only --diff .
+
+      - name: Lint with flake8
+        run: poetry run flake8 --statistics --show-source
+
+      - name: Type check with mypy
+        run: poetry run mypy .
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      POETRY_VIRTUALENVS_IN_PROJECT: "true"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Poetry
+        run: |
+          pip install --upgrade pip
+          pip install "poetry==1.8.3"
+
+      - name: Cache Poetry virtualenv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py3.11-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-py3.11-
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-ansi --with dev
+
+      - name: Run tests with coverage
+        run: |
+          poetry run pytest \
+            --cov=k8s_ml_predictive_autoscaling \
+            --cov-report=term-missing \
+            --cov-report=xml \
+            --cov-report=html \
+            --maxfail=1 \
+            -v
+
+      - name: Upload coverage to artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            htmlcov/
+          retention-days: 7
+
+      - name: Coverage summary
+        run: |
+          echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY

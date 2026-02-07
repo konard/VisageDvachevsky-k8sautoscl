@@ -1,0 +1,12 @@
+{
+  "model_type": "prophet",
+  "test_metrics": {
+    "rmse": 0.7350185291968502,
+    "mae": 0.5992489690909815,
+    "mape": 178.09937366018093,
+    "r2": 0.4444580473736839,
+    "mse": 0.540252238262701
+  },
+  "test_samples": 1630,
+  "target_column": "cpu_usage"
+}

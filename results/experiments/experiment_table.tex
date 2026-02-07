@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{HPA vs ML Autoscaler — Experiment Results}
+\label{tab:experiment-results}
+\small
+\begin{tabular}{l|rr|rr|rr|r}
+\hline
+\textbf{Scenario} & \multicolumn{2}{c|}{\textbf{Avg Replicas}} & \multicolumn{2}{c|}{\textbf{SLA Violations}} & \multicolumn{2}{c|}{\textbf{Scaling Events}} & \textbf{Cost} \\
+& HPA & ML & HPA & ML & HPA & ML & \textbf{Savings} \\
+\hline
+Stable Workload & 2.0 & 2.0 & 0 & 0 & 0 & 0 & +0.0\% \\
+Gradual Ramp & 4.6 & 4.2 & 0 & 0 & 6 & 3 & +8.1\% \\
+Spike Pattern & 3.8 & 6.1 & 0 & 0 & 41 & 19 & -57.9\% \\
+Diurnal Cycle & 5.7 & 6.5 & 0 & 0 & 21 & 12 & -13.4\% \\
+\hline
+\end{tabular}
+\end{table}

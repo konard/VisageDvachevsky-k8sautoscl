@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - rules.yml
+
+scrape_configs:
+  - job_name: demo-services
+    honor_labels: true
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - demo-service-a:8000
+          - demo-service-b:8000
+          - demo-service-c:8000
+
+  - job_name: predictor
+    honor_labels: true
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets:
+          - predictor:8000
+
+  - job_name: planner
+    honor_labels: true
+    metrics_path: /metrics
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+          - planner:8000

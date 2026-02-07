@@ -1,0 +1,20 @@
+{
+  "model_type": "hybrid_prophet_lstm",
+  "test_metrics": {
+    "rmse": 0.559620591220014,
+    "mae": 0.45962642049910835,
+    "mape": 257.1541060433228,
+    "r2": 0.6796261272876363,
+    "mse": 0.313175206117438
+  },
+  "prophet_only_metrics": {
+    "rmse": 0.7350575084156151,
+    "mae": 0.5943955578095939,
+    "mape": 164.8724485253808,
+    "r2": 0.4472708674594341,
+    "mse": 0.540309540678172
+  },
+  "rmse_improvement_over_prophet_pct": 23.867100898506283,
+  "r2_improvement_over_prophet": 0.23235525982820215,
+  "test_samples": 1606
+}

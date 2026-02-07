@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-service
+  namespace: predictive-autoscaling
+  labels:
+    app: demo-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-service
+  template:
+    metadata:
+      labels:
+        app: demo-service
+    spec:
+      containers:
+        - name: demo-service
+          image: ghcr.io/visagedvachevsky/k8s-ml-predictive-autoscaling-demo:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AUTOSCALER_SERVICE_NAME
+              value: demo-service
+            - name: AUTOSCALER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: demo-service-credentials
+                  key: api-token
+            - name: AUTOSCALER_API_KEY_HEADER
+              value: X-API-Key
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

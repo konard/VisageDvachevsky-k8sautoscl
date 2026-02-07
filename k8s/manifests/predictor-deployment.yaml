@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predictor
+  namespace: predictive-autoscaling
+  labels:
+    app: predictor
+    component: inference
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: predictor
+  template:
+    metadata:
+      labels:
+        app: predictor
+        component: inference
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: predictor
+          image: ghcr.io/visagedvachevsky/k8s-ml-predictor:0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PREDICTOR_ENVIRONMENT
+              value: prod
+            - name: PREDICTOR_LOG_LEVEL
+              value: INFO
+            - name: PREDICTOR_ONNX_MODEL_PATH
+              value: /app/models/onnx/lstm_forecaster.onnx
+            - name: PREDICTOR_SCALER_PATH
+              value: /app/data/processed/scaler.pkl
+            - name: PREDICTOR_METADATA_PATH
+              value: /app/data/processed/metadata.json
+            - name: PREDICTOR_SEQUENCE_LENGTH
+              value: "24"
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

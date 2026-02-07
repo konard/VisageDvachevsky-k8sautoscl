@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "growth": "linear",
+    "changepoints": [
+      "2018-01-01 21:15:00",
+      "2018-01-02 17:35:00",
+      "2018-01-03 13:50:00",
+      "2018-01-04 10:05:00",
+      "2018-01-05 06:25:00",
+      "2018-01-06 02:40:00",
+      "2018-01-06 22:55:00",
+      "2018-01-07 19:15:00",
+      "2018-01-08 15:30:00",
+      "2018-01-09 11:45:00",
+      "2018-01-10 08:05:00",
+      "2018-01-11 04:20:00",
+      "2018-01-12 00:35:00",
+      "2018-01-12 20:50:00",
+      "2018-01-13 17:10:00",
+      "2018-01-14 13:25:00",
+      "2018-01-15 09:40:00",
+      "2018-01-16 06:00:00",
+      "2018-01-17 02:15:00",
+      "2018-01-17 22:30:00",
+      "2018-01-18 18:50:00",
+      "2018-01-19 15:05:00",
+      "2018-01-20 11:20:00",
+      "2018-01-21 07:40:00",
+      "2018-01-22 03:55:00"
+    ],
+    "n_changepoints": 25,
+    "seasonality_mode": "multiplicative",
+    "changepoint_prior_scale": 0.05,
+    "seasonality_prior_scale": 10.0,
+    "daily_seasonality": true,
+    "weekly_seasonality": true,
+    "yearly_seasonality": false
+  },
+  "note": "Prophet model is serialized as pickle. This JSON contains metadata only. For inference, use joblib.load() on the .pkl file or the ONNX LSTM model directly."
+}

@@ -1,0 +1,43 @@
+input_glob: data/raw/*.csv
+output_dir: data/processed
+
+# For Docker Compose: use demo_service metrics
+# For Kubernetes: uncomment cpu_metrics and memory_metrics
+metrics:
+  - request_rate      # Rate of incoming requests
+  - latency_p50       # Median latency
+  - latency_p95       # 95th percentile latency
+  - latency_p99       # 99th percentile latency
+  - active_jobs       # Synthetic load metric
+  # - cpu_metrics     # Uncomment for K8s with cAdvisor
+  # - memory_metrics  # Uncomment for K8s with cAdvisor
+
+scaler_features:
+  - request_rate
+  - latency_p50
+  - latency_p95
+  - latency_p99
+  - active_jobs
+
+resample_rule: 1min
+interpolation_method: time
+
+features:
+  enable_time_features: true
+  lags: [1, 5, 15, 30]        # Look back 1, 5, 15, 30 minutes
+  rolling_windows: [5, 15, 30]  # Rolling averages
+
+anomaly:
+  enabled: true
+  zscore_threshold: 3.5  # More lenient for synthetic spikes
+
+sliding_window:
+  sequence_length: 60     # 60 minutes of history for LSTM
+  forecast_steps: [5, 15, 30]  # Predict 5, 15, 30 minutes ahead
+  stride: 5               # Create windows every 5 minutes
+  target_metric: request_rate  # Predict request rate
+
+splits:
+  train: 0.7
+  validation: 0.15
+  test: 0.15

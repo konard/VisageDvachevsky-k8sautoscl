@@ -1,0 +1,55 @@
+prometheus:
+  base_url: http://localhost:9090
+  timeout_seconds: 15
+  verify_ssl: true  # Use trusted certificates; disable only in controlled environments
+
+collection:
+  output_dir: data/raw
+  lookback_hours: 48  # Collect 48 hours of data
+  chunk_hours: 6
+  default_step: 30s
+
+metrics:
+  # Request rate - основная метрика нагрузки
+  - name: request_rate
+    promql: rate(demo_service_requests_total{job="demo-services"}[1m])
+    output_prefix: request_rate
+    step: 30s
+
+  # Latency percentiles - для анализа производительности
+  - name: latency_p50
+    promql: histogram_quantile(0.50, rate(demo_service_request_latency_seconds_bucket{job="demo-services"}[1m]))
+    output_prefix: latency_p50
+    step: 30s
+
+  - name: latency_p95
+    promql: histogram_quantile(0.95, rate(demo_service_request_latency_seconds_bucket{job="demo-services"}[1m]))
+    output_prefix: latency_p95
+    step: 30s
+
+  - name: latency_p99
+    promql: histogram_quantile(0.99, rate(demo_service_request_latency_seconds_bucket{job="demo-services"}[1m]))
+    output_prefix: latency_p99
+    step: 30s
+
+  # Active jobs - синтетическая метрика нагрузки
+  - name: active_jobs
+    promql: demo_service_active_jobs{job="demo-services"}
+    output_prefix: active_jobs
+    step: 30s
+
+  # Total requests count - для подсчёта объема
+  - name: total_requests
+    promql: demo_service_requests_total{job="demo-services"}
+    output_prefix: total_requests
+    step: 30s
+
+  # Note: CPU/memory metrics require cAdvisor or Kubernetes.
+  # For Docker Compose, use demo_service metrics above.
+  # For K8s deployment, uncomment and adjust namespace:
+  # - name: cpu_metrics
+  #   promql: rate(container_cpu_usage_seconds_total{namespace="predictive-autoscaling"}[5m])
+  #   output_prefix: cpu_metrics
+  # - name: memory_metrics
+  #   promql: container_memory_working_set_bytes{namespace="predictive-autoscaling"}
+  #   output_prefix: memory_metrics
